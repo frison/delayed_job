@@ -98,7 +98,7 @@ h2.
   
   By allowing a DJ handler to do some preprocessing before the DJ table is locked, we can create recurring events using the
   following code:
-<pre><code>
+
   class RecurringEvent
 
     def preprocess
@@ -115,7 +115,6 @@ h2.
     end
 
   end
-</code></pre>
 
 h3. Cleaning up
 
