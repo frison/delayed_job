@@ -80,6 +80,11 @@ module Delayed
 
     # Try to run one job. Returns true/false (work done/work failed) or nil if job can't be locked.
     def run_with_lock(max_run_time, worker_name)
+      if payload_object.respond_to?(:preprocess)
+        logger.info "* [JOB] running job preprocess task"
+        payload_object.preprocess
+      end
+    
       logger.info "* [JOB] aquiring lock on #{name}"
       unless lock_exclusively!(max_run_time, worker_name)
         # We did not get the lock, some other worker process must have
@@ -109,7 +114,7 @@ module Delayed
       unless object.respond_to?(:perform) || block_given?
         raise ArgumentError, 'Cannot enqueue items which do not respond to perform'
       end
-    
+
       priority = args.first || 0
       run_at   = args[1]
 
