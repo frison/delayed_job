@@ -93,6 +93,30 @@ Keep in mind that each worker will check the database at least every 5 seconds.
 
 Note: The rake task will exit if the database has any network connectivity problems.
 
+h2.
+  Preprocessing
+  
+  By allowing a DJ handler to do some preprocessing before the DJ table is locked, we can create recurring events using the
+  following code:
+<pre><code>
+class RecurringEvent
+
+  def preprocess
+    recur = self.class.new
+
+    # Don't want to create another one if there is already 2 going in the next 2 minutes
+    if (Delayed::Job.find_all_by_handler(recur.to_yaml, :conditions => ['run_at <= ?', Time.now + 2.minutes]).length <= 1)
+      Delayed::Job.create({:run_at => Time.now + 37.seconds, :handler => me }) # This will run again in 37 seconds
+    end
+  end
+
+
+  def perform
+    Reminder.reminder_everyone_too_often
+  end
+
+end
+
 h3. Cleaning up
 
 You can invoke @rake jobs:clear@ to delete all jobs in the queue.
